@@ -1,0 +1,6 @@
+node_modules/
+data/seed/*
+data/downloads/*
+*.torrent.json
+!.gitkeep
+.DS_Store
