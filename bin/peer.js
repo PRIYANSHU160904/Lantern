@@ -12,6 +12,7 @@ const { values: v } = parseArgs({
   options: {
     torrent: { type: "string" },
     file: { type: "string" },
+    dir: { type: "string" },
     name: { type: "string", default: "peer" },
     port: { type: "string", default: "0" },
     host: { type: "string", default: "0.0.0.0" },
@@ -31,12 +32,16 @@ const { values: v } = parseArgs({
 });
 
 if (!v.torrent || !v.file) {
-  console.error("required: --torrent <meta.json> --file <path>");
+  console.error("required: --torrent <meta.json>");
   process.exit(1);
 }
 
 // 1. Load metadata & ensure file destination directory exists
 const meta = await loadMetadata(v.torrent);
+
+const outputDir = v.dir ?? "./downloads";
+const filePath = v.file ?? path.join(outputDir, meta.name);
+
 await fs.mkdir(path.dirname(v.file), { recursive: true });
 
 // 2. Open underlying sparse/full file piece storage
