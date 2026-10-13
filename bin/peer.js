@@ -31,21 +31,23 @@ const { values: v } = parseArgs({
   },
 });
 
-if (!v.torrent || !v.file) {
+// FIX 1: Only check if --torrent is missing
+if (!v.torrent) {
   console.error("required: --torrent <meta.json>");
   process.exit(1);
 }
 
-// 1. Load metadata & ensure file destination directory exists
+// 1. Load metadata & resolve output file path
 const meta = await loadMetadata(v.torrent);
 
 const outputDir = v.dir ?? "./downloads";
 const filePath = v.file ?? path.join(outputDir, meta.name);
 
-await fs.mkdir(path.dirname(v.file), { recursive: true });
+// FIX 2: Use filePath instead of v.file
+await fs.mkdir(path.dirname(filePath), { recursive: true });
 
-// 2. Open underlying sparse/full file piece storage
-const store = await PieceStore.open(meta, v.file);
+// FIX 3: Open store using resolved filePath
+const store = await PieceStore.open(meta, filePath);
 
 // 3. Assemble and initialize core Peer orchestrator
 const peer = new Peer({
